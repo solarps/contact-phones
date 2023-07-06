@@ -1,7 +1,9 @@
 package com.testtask.phonecontacts.security;
 
+import lombok.EqualsAndHashCode;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 
+@EqualsAndHashCode(callSuper = false)
 public class UserPrincipalAuthenticationToken extends AbstractAuthenticationToken {
     private final UserPrincipal principal;
 

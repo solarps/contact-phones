@@ -6,6 +6,7 @@ import com.testtask.phonecontacts.persistance.entity.Role;
 import com.testtask.phonecontacts.persistance.entity.User;
 import com.testtask.phonecontacts.security.JwtService;
 import com.testtask.phonecontacts.security.UserPrincipal;
+import com.testtask.phonecontacts.service.exceptions.EntityExistsException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -37,6 +38,6 @@ public class AuthService {
             userRepository.save(new User(username, passwordEncoder.encode(password), Role.USER));
             return loginUser(username, password);
         }
-        throw new RuntimeException("User already exists");
+        throw new EntityExistsException("User already exists");
     }
 }

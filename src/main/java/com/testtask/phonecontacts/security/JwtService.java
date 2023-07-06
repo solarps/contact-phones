@@ -18,7 +18,7 @@ public class JwtService {
     public String assemble(Long userId, String username, List<String> roles) {
         return JWT.create()
                 .withSubject(userId.toString())
-                .withExpiresAt(Instant.now().plus(Duration.ofMinutes(15)))
+                .withExpiresAt(Instant.now().plus(Duration.ofHours(1)))
                 .withClaim("u", username)
                 .withClaim("r", roles)
                 .sign(Algorithm.HMAC256(properties.getSecretKey()));
