@@ -1,0 +1,27 @@
+version: '2'
+
+services:
+  app:
+    image: 'phone-contacts:latest'
+    build:
+      context: .
+    ports:
+      - "8080:8080"
+    container_name: app
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/postgres
+      - SPRING_DATASOURCE_USERNAME=postgres
+      - SPRING_DATASOURCE_PASSWORD=admin
+  db:
+    image: postgres
+    restart: always
+    container_name: db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=admin
+    volumes:
+      - ./src/main/resources/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
