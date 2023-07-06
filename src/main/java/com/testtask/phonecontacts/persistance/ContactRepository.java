@@ -11,18 +11,17 @@ public interface ContactRepository extends JpaRepository<Contact, Long> {
 
     @Query("""
             select distinct c from Contact c
-             join User u on u.username = :username
              left join fetch c.emails e
-             left join fetch c.phones p""")
+             left join fetch c.phones p
+             where c.user.username = :username""")
     Collection<Contact> findAllByUsername(String username);
 
     boolean existsByName(String name);
 
     @Query("""
             select distinct c from Contact c
-            join User u on u.username = :username
              left join fetch c.emails e
              left join fetch c.phones p
-             where c.name = :name""")
+             where c.name = :name and c.user.username = :username""")
     Optional<Contact> findByUsernameAndName(String username, String name);
 }

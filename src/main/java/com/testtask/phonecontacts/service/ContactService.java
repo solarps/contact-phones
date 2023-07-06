@@ -2,6 +2,8 @@ package com.testtask.phonecontacts.service;
 
 import com.testtask.phonecontacts.model.ContactModel;
 import com.testtask.phonecontacts.persistance.ContactRepository;
+import com.testtask.phonecontacts.persistance.EmailRepository;
+import com.testtask.phonecontacts.persistance.PhoneRepository;
 import com.testtask.phonecontacts.persistance.UserRepository;
 import com.testtask.phonecontacts.persistance.entity.Contact;
 import com.testtask.phonecontacts.persistance.entity.Email;
@@ -22,6 +24,8 @@ public class ContactService {
 
     private final ContactRepository contactRepository;
     private final UserRepository userRepository;
+    private final PhoneRepository phoneRepository;
+    private final EmailRepository emailRepository;
 
     @Transactional(readOnly = true)
     public Collection<ContactModel> findAllContactsForUser(String username) {
@@ -50,11 +54,19 @@ public class ContactService {
     public ContactModel editContactForUser(ContactModel contactModel, String username) {
         Contact contact = contactRepository.findByUsernameAndName(username, contactModel.getName())
                 .orElseThrow(() -> new EntityNotFoundException("Contact not found"));
+
+        phoneRepository.removeAllByContact(contact);
+        emailRepository.removeAllByContact(contact);
+
         contact.setPhones(contactModel.getPhones());
         contact.setEmails(contactModel.getEmails());
+
+        contact.getPhones().forEach(phone -> phone.setContact(contact));
+        contact.getEmails().forEach(email -> email.setContact(contact));
         return ContactModel.fromContact(contact);
     }
 
+    @Transactional
     public void deleteContactForUser(String name, String username) {
         Contact contact = contactRepository.findByUsernameAndName(username, name)
                 .orElseThrow(() -> new EntityNotFoundException("Contact not found"));

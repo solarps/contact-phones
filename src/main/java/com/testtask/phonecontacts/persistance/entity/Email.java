@@ -24,6 +24,7 @@ public class Email {
     private Contact contact;
 
     @JsonValue
+    @Column(name = "email")
     private String value;
 
     public Email(String value) {
