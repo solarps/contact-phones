@@ -1,6 +1,7 @@
 package com.testtask.phonecontacts.config;
 
 import com.testtask.phonecontacts.security.JwtAuthenticationFilter;
+import com.testtask.phonecontacts.security.UnauthorizedHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +22,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final UnauthorizedHandler unauthorizedHandler;
 
     @Bean
     protected SecurityFilterChain appSecurity(HttpSecurity http) throws Exception {
@@ -30,6 +32,7 @@ public class SecurityConfig {
                 .cors(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .securityMatcher("/**")
+                .exceptionHandling(conf -> conf.authenticationEntryPoint(unauthorizedHandler))
                 .authorizeHttpRequests(registry -> registry.requestMatchers("/").permitAll()
                         .requestMatchers("/auth/login").permitAll()
                         .requestMatchers("/auth/register").permitAll()

@@ -37,7 +37,7 @@ public class ContactService {
 
     @Transactional
     public ContactModel addNewContactForUser(ContactModel contactModel, String username) {
-        User user = userRepository.findByUsername(username).orElseThrow();
+        User user = userRepository.findByUsername(username).orElseThrow(EntityNotFoundException::new);
         if (contactRepository.existsByName(contactModel.getName())) {
             throw new EntityExistsException("Contact already exists");
         }
