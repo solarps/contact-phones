@@ -15,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Set;
 
@@ -38,15 +39,10 @@ public class ContactService {
     @Transactional
     public ContactModel addNewContactForUser(ContactModel contactModel, String username) {
         User user = userRepository.findByUsername(username).orElseThrow(EntityNotFoundException::new);
-        if (contactRepository.existsByName(contactModel.getName())) {
+        if (contactRepository.findByUsernameAndName(username, contactModel.getName()).isPresent()) {
             throw new EntityExistsException("Contact already exists");
         }
-        Set<Email> emails = contactModel.getEmails();
-        Set<Phone> phones = contactModel.getPhones();
-
-        Contact contact = new Contact(contactModel.getName(), user, emails, phones);
-        emails.forEach(email -> email.setContact(contact));
-        phones.forEach(phone -> phone.setContact(contact));
+        Contact contact = createContact(user, contactModel);
         return ContactModel.fromContact(contactRepository.save(contact));
     }
 
@@ -71,5 +67,27 @@ public class ContactService {
         Contact contact = contactRepository.findByUsernameAndName(username, name)
                 .orElseThrow(() -> new EntityNotFoundException("Contact not found"));
         contactRepository.delete(contact);
+    }
+
+    public void addAllContactsForUser(Collection<ContactModel> contactModels, String username) {
+        User user = userRepository.findByUsername(username).orElseThrow(EntityNotFoundException::new);
+        Collection<Contact> contactsToSave = new ArrayList<>();
+        for (ContactModel contactModel : contactModels) {
+            Contact contact = createContact(user, contactModel);
+            if (contactRepository.findByUsernameAndName(username, contactModel.getName()).isEmpty()) {
+                contactsToSave.add(contact);
+            }
+        }
+        contactRepository.saveAll(contactsToSave);
+    }
+
+    private Contact createContact(User user, ContactModel contactModel) {
+        Set<Email> emails = contactModel.getEmails();
+        Set<Phone> phones = contactModel.getPhones();
+
+        Contact contact = new Contact(contactModel.getName(), user, emails, phones);
+        emails.forEach(email -> email.setContact(contact));
+        phones.forEach(phone -> phone.setContact(contact));
+        return contact;
     }
 }

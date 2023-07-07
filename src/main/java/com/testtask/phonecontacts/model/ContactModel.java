@@ -7,10 +7,7 @@ import com.testtask.phonecontacts.persistance.entity.Phone;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,6 +16,7 @@ import java.util.stream.Collectors;
 @Setter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class ContactModel {
     @NotEmpty
     @NotNull
@@ -43,6 +41,7 @@ public class ContactModel {
                 .map(com.testtask.phonecontacts.persistance.entity.Email::new)
                 .collect(Collectors.toSet());
     }
+
     public Set<Phone> getPhones() {
         return phones.stream()
                 .map(Phone::new)

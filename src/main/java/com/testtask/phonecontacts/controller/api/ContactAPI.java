@@ -1,5 +1,6 @@
 package com.testtask.phonecontacts.controller.api;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.testtask.phonecontacts.model.ContactModel;
 import com.testtask.phonecontacts.security.UserPrincipal;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,10 +11,13 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Collection;
 
 @Tag(name = "Contacts", description = "Operations related to contacts")
@@ -50,4 +54,16 @@ public interface ContactAPI {
     @DeleteMapping
     @ResponseStatus(HttpStatus.NO_CONTENT)
     ResponseEntity<Void> deleteContact(@RequestParam String name, @AuthenticationPrincipal UserPrincipal userPrincipal);
+
+    @Operation(summary = "Export contacts")
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping(value = "/export", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    ResponseEntity<byte[]> exportContacts(@AuthenticationPrincipal UserPrincipal userPrincipal) throws JsonProcessingException;
+
+    @Operation(summary = "Import contacts",
+            responses = @ApiResponse(responseCode = "200",
+                    content = @Content(schema = @Schema(implementation = ResponseEntity.class))))
+    @PostMapping(value = "/import",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @ResponseStatus(HttpStatus.OK)
+    ResponseEntity<Void> importContacts(@RequestParam("file") MultipartFile file, @AuthenticationPrincipal UserPrincipal userPrincipal) throws IOException;
 }
