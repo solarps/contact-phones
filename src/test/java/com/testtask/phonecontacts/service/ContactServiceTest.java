@@ -2,8 +2,6 @@ package com.testtask.phonecontacts.service;
 
 import com.testtask.phonecontacts.model.ContactModel;
 import com.testtask.phonecontacts.persistance.ContactRepository;
-import com.testtask.phonecontacts.persistance.EmailRepository;
-import com.testtask.phonecontacts.persistance.PhoneRepository;
 import com.testtask.phonecontacts.persistance.UserRepository;
 import com.testtask.phonecontacts.persistance.entity.Contact;
 import com.testtask.phonecontacts.persistance.entity.User;
@@ -29,10 +27,6 @@ class ContactServiceTest {
     private ContactRepository contactRepository;
     @MockBean
     private UserRepository userRepository;
-    @MockBean
-    private PhoneRepository phoneRepository;
-    @MockBean
-    private EmailRepository emailRepository;
 
     @Autowired
     private ContactService contactService;
@@ -52,13 +46,13 @@ class ContactServiceTest {
         ContactModel contactModel = TestContactUtil.createModel();
         Contact contact = TestContactUtil.createContact();
         when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
-        when(contactRepository.existsByName(any())).thenReturn(false);
+        when(contactRepository.findByUsernameAndName(any(), any())).thenReturn(Optional.empty());
         when(contactRepository.save(any())).thenReturn(contact);
 
         assertEquals(contactService.addNewContactForUser(contactModel, user.getUsername()).getName(), ContactModel.fromContact(contact).getName());
 
         verify(userRepository, times(1)).findByUsername(any());
-        verify(contactRepository, times(1)).existsByName(any());
+        verify(contactRepository, times(1)).findByUsernameAndName(any(), any());
         verify(contactRepository, times(1)).save(any());
     }
 
@@ -68,12 +62,12 @@ class ContactServiceTest {
         ContactModel contactModel = TestContactUtil.createModel();
         String testUsername = user.getUsername();
         when(userRepository.findByUsername(user.getUsername())).thenReturn(Optional.of(user));
-        when(contactRepository.existsByName(any())).thenReturn(true);
+        when(contactRepository.findByUsernameAndName(any(), any())).thenReturn(Optional.of(new Contact()));
 
         assertThrows(EntityExistsException.class, () -> contactService.addNewContactForUser(contactModel, testUsername));
 
         verify(userRepository, times(1)).findByUsername(any());
-        verify(contactRepository, times(1)).existsByName(any());
+        verify(contactRepository, times(1)).findByUsernameAndName(any(), any());
     }
 
     @Test
@@ -81,13 +75,8 @@ class ContactServiceTest {
         Contact contact = TestContactUtil.createContact();
         ContactModel model = TestContactUtil.createModel();
         when(contactRepository.findByUsernameAndName(any(), any())).thenReturn(Optional.of(contact));
-        doNothing().when(phoneRepository).removeAllByContact(any());
-        doNothing().when(emailRepository).removeAllByContact(any());
 
         assertNotNull(contactService.editContactForUser(model, contact.getName()));
-
-        verify(phoneRepository,times(1)).removeAllByContact(any());
-        verify(emailRepository,times(1)).removeAllByContact(any());
     }
 
     @Test

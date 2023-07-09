@@ -1,13 +1,10 @@
 package com.testtask.phonecontacts.persistance.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.hibernate.annotations.Fetch;
-import org.hibernate.annotations.FetchMode;
 
 import java.util.Set;
 
@@ -28,17 +25,17 @@ public class Contact {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @JsonManagedReference
-    @OneToMany(mappedBy = "contact", cascade = CascadeType.ALL)
-    @Fetch(value = FetchMode.SUBSELECT)
-    private Set<Email> emails;
+    @ElementCollection
+    @CollectionTable(name = "emails", joinColumns = @JoinColumn(name = "contact_id"))
+    @Column(name = "email")
+    private Set<String> emails;
 
-    @JsonManagedReference
-    @OneToMany(mappedBy = "contact", cascade = CascadeType.ALL)
-    @Fetch(value = FetchMode.SUBSELECT)
-    private Set<Phone> phones;
+    @ElementCollection
+    @CollectionTable(name = "phones", joinColumns = @JoinColumn(name = "contact_id"))
+    @Column(name = "phone_number")
+    private Set<String> phones;
 
-    public Contact(String name, User user, Set<Email> emails, Set<Phone> phones) {
+    public Contact(String name, User user, Set<String> emails, Set<String> phones) {
         this.name = name;
         this.user = user;
         this.emails = emails;
